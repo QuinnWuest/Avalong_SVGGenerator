@@ -31,6 +31,7 @@ public enum EnumAR
     MordredA,
     MordredB,
     Oberon,
+    Guinevere,
     Spy,
 }
 
@@ -38,7 +39,8 @@ public enum MissionStatus
 {
     None,
     Success,
-    Fail
+    Fail,
+    Grayed
 }
 
 public class AvalongRole
@@ -123,48 +125,99 @@ static class Avalong
             [EnumAR.Isolde] = new AvalongRole(EnumAR.Isolde, "Isolde", false),
             [EnumAR.Resistance] = new AvalongRole(EnumAR.Resistance, "Resistance", false),
             [EnumAR.Oberon] = new AvalongRole(EnumAR.Oberon, "Oberon", true),
+            [EnumAR.Guinevere] = new AvalongRole(EnumAR.Guinevere, "Guinevere", true, isVisibleToMerlin: false),
             [EnumAR.Assassin] = new AvalongRole(EnumAR.Assassin, "Assassin", true),
             [EnumAR.Morgana] = new AvalongRole(EnumAR.Morgana, "Morgana", true, isPercivalCandidate: true),
             [EnumAR.Witch] = new AvalongRole(EnumAR.Witch, "Witch", true),
+            [EnumAR.Spy] = new AvalongRole(EnumAR.Witch, "Spy", true),
             [EnumAR.Mordred] = new AvalongRole(EnumAR.Mordred, "Mordred", true, isVisibleToMerlin: false)
         };
 
         //All the players with their respective role. Order here is irrelevant, but is done alphabetically for easier editing.
-        PlayerInfo pingu = new("pingu", dict[EnumAR.Resistance]);
-        PlayerInfo rose = new("Rose", dict[EnumAR.Resistance]);
-        PlayerInfo oolong = new("oolong", dict[EnumAR.Resistance]);
-        PlayerInfo wang = new("wanglebangle", dict[EnumAR.Resistance]);
-        PlayerInfo side = new("sidewalkill", dict[EnumAR.Resistance]);
-        PlayerInfo z123 = new("z123", dict[EnumAR.Resistance]);
-        PlayerInfo bum = new("bumfuzzle28", dict[EnumAR.Resistance]);
-        PlayerInfo milli = new("milli", dict[EnumAR.Resistance]);
+        PlayerInfo mouse = new("Mouse", dict[EnumAR.Merlin]);
+        PlayerInfo anji = new("Anji", dict[EnumAR.Percival]);
+        PlayerInfo gimbap = new("gimbap", dict[EnumAR.Tristan]);
+        PlayerInfo nlk = new("NoLifeKing", dict[EnumAR.Isolde]);
+        PlayerInfo bn = new("BasicNerd", dict[EnumAR.Assassin]);
+        PlayerInfo bum = new("bumfuzzle28", dict[EnumAR.Morgana]);
+        PlayerInfo pingu = new("pingu", dict[EnumAR.Mordred]);
+        PlayerInfo akane = new("Akane", dict[EnumAR.Witch]);
+        PlayerInfo marcistar = new("Marcistar", dict[EnumAR.Guinevere]);
+        PlayerInfo rose = new("Rose", dict[EnumAR.Spy]);
+        PlayerInfo inge = new("ingenue", dict[EnumAR.Oberon]);
+        PlayerInfo ceki = new("Ceki", dict[EnumAR.Resistance]);
         PlayerInfo gus = new("Gus", dict[EnumAR.Resistance]);
         PlayerInfo murph = new("Murph", dict[EnumAR.Resistance]);
-        PlayerInfo jer = new("Jer", dict[EnumAR.Resistance]);
         PlayerInfo obj = new("Object", dict[EnumAR.Resistance]);
-        PlayerInfo rc = new("RadiantCowbells", dict[EnumAR.Resistance]);
-        
-        var playersInOrder = new PlayerInfo[] { pingu, rose, oolong, wang, side, z123, bum, milli, gus, murph, jer, obj, rc };
+        PlayerInfo leon = new("Leon", dict[EnumAR.Resistance]);
+        PlayerInfo violet = new("Violet", dict[EnumAR.Resistance]);
+        PlayerInfo wang = new("wanglebangle", dict[EnumAR.Resistance]);
+        PlayerInfo z123 = new("z123", dict[EnumAR.Resistance]);
+
+        // Tribe A
+        var tribeSeptember = new[]
+        {
+            gimbap, obj, wang, anji, rose, gus, mouse, marcistar, bn
+        };
+        var tribeOctober = new[]
+        {
+            akane, violet, inge, pingu, bum, z123, ceki, leon, murph, nlk
+        };
+        PlayerInfo[] playersInOrder;
+        var pioList = new List<PlayerInfo>();
+        pioList.AddRange(tribeSeptember);
+        pioList.Add(null);
+        pioList.AddRange(tribeOctober);
+        pioList.Add(null);
+        playersInOrder = pioList.ToArray();
+        playersInOrder = RotateLeft(playersInOrder, 4);
+        // Tribe B
+        // var playersInOrder = new PlayerInfo[] {  };
 
         // Mission status information
-        MissionStatus[] missionInfo = new MissionStatus[7] {
-            MissionStatus.None,
-            MissionStatus.None,
-            MissionStatus.None,
-            MissionStatus.None,
-            MissionStatus.None,
-            MissionStatus.None,
+
+        const int missionSize = 13;
+
+        MissionStatus[] missionInfo = new MissionStatus[missionSize]
+        {
+            //9p
+            MissionStatus.Success,
+            MissionStatus.Fail,
+            MissionStatus.Success,
+            MissionStatus.Fail,
+
+            //10p
+            MissionStatus.Fail,
+            MissionStatus.Success,
+            MissionStatus.Success,
+            MissionStatus.Fail,
+
+            //Merged
+            MissionStatus.Grayed,
+            MissionStatus.Grayed,
+            MissionStatus.Grayed,
+            MissionStatus.Grayed,
             MissionStatus.None,
         };
         // Mission size information
-        string[] sizes = new string[] { "4", "5", "6", "7*", "6", "7*", "7" };
-
+        // 9p: 3, 4, 5*, 5
+        // 10p: 4, 5*, 5, 6
+        string[] sizes = new string[] {
+            "3", "4", "5*", "5",
+            "4", "5*", "5", "6",
+            "8", "9*", "9", "10*" ,"10", };
+        string[] failCounts = new string[]
+        {
+            "", "1 fail", "", "1 fail",
+            "2 fails", "", "", "1 fail",
+            "", "", "", "", ""
+        };
         bool showAvatars = true;
 
         // Players on mission information
         bool missionSelected = false; // True = Display crown + shields. Set to "false" for initial role giveout.
-        PlayerInfo[] leaders = new PlayerInfo[] {  };
-        PlayerInfo[] onMission = new PlayerInfo[] {  };
+        PlayerInfo[] leaders = new PlayerInfo[] { obj, bum };
+        PlayerInfo[] onMission = new PlayerInfo[] { obj, gus, bn, anji, wang, bum, pingu, leon, murph, violet, z123 };
 
         // Player to be banished. They appear slightly transparent with "BANISHED" over their avatar.
         PlayerInfo banishedPlayer = null;
@@ -175,16 +228,16 @@ static class Avalong
 
         // Hammer holder. This player has the hammer icon below their name.
         string hammerHolder = null;
-        
+
         // Powers.
         // Top array = the names of the powers (refer to "powers" folder for image names).
         // Bottom array = the names of the players holding each power.
-        var powers = new string[] { "ref", "lady" };
-        var powerHolders = new PlayerInfo[] { pingu, z123 };
+        var powers = new string[] {  };
+        var powerHolders = new PlayerInfo[] {  };
 
         // Game ending information. Display all roles + assassination choice.
         bool gameEnd = true;
-        PlayerInfo[] assassinationChoice = new PlayerInfo[] { z123, pingu };
+        PlayerInfo[] assassinationChoice = new PlayerInfo[] { mouse };
 
         // END EDITING BLOCK
 
@@ -209,26 +262,78 @@ static class Avalong
                 />";
         }
 
+        const int missionWidth = 85;
+        const int missionHeight = 60;
+        const int missionSpacing = 100;
+        const int centerX = 960;
+
+        const int topY = 250;
+        const int mergedY = 320;
+        const int bottomY = 390;
+
         for (int i = 0; i < missionInfo.Length; i++)
         {
-            var color = missionInfo[i] == MissionStatus.None ? "rgb(150,150,150)" : missionInfo[i] == MissionStatus.Success ? "rgb(0,68,204)" : "rgb(189,54,47)";
+            int x;
+            int y;
+            if (i < 4)
+            {
+                int rowWidth = 3 * missionSpacing + missionWidth;
+                int startX = centerX - rowWidth / 2;
+                x = startX + i * missionSpacing;
+                y = topY;
+            }
+            else if (i < 8)
+            {
+                int rowWidth = 3 * missionSpacing + missionWidth;
+                int startX = centerX - rowWidth / 2;
+                x = startX + (i - 4) * missionSpacing;
+                y = bottomY;
+            }
+            else
+            {
+                int remaining = missionInfo.Length - 8;
+                int rowWidth = (remaining - 1) * missionSpacing + missionWidth;
+                int startX = centerX - rowWidth / 2;
+                x = startX + (i - 8) * missionSpacing;
+                y = mergedY;
+            }
+
+            var color =
+                missionInfo[i] == MissionStatus.Grayed ? "rgb(80,80,80)" :
+                missionInfo[i] == MissionStatus.Success ? "rgb(0,68,204)" :
+                missionInfo[i] == MissionStatus.Fail ? "rgb(189,54,47)" :
+                "rgb(150,150,150)";
+            var textColor = missionInfo[i] == MissionStatus.Grayed ? "rgb(150,150,150)" : "white";
             var str = $@"<g>
+
                 <rect
-                    width=""85""
-                    height=""60""
-                    x=""{620 + (i * 100)}""
-                    y=""330""
+                    width=""{missionWidth}""
+                    height=""{missionHeight}""
+                    x=""{x}""
+                    y=""{y}""
                     rx=""10""
                     style=""fill:{color};""
                 />
+
                 <text
-                    x=""{655 + (i * 100)}""
-                    y=""370""
+                    x=""{x + missionWidth / 2}""
+                    y=""{y + 40}""
                     font-family=""Arial""
-                    fill=""white""
+                    fill=""{textColor}""
                     font-size=""32px""
+                    text-anchor=""middle""
                 >{sizes[i]}</text>
-                </g>";
+
+                <text
+                    x=""{x + missionWidth / 2}""
+                    y=""{y + 53}""
+                    font-family=""Arial""
+                    fill=""{textColor}""
+                    font-size=""15px""
+                    text-anchor=""middle""
+                >{failCounts[i]}</text>
+
+            </g>";
             mainSvg += str;
             for (int p = 0; p < playerSvgs.Length; p++)
                 playerSvgs[p] += str;
@@ -236,14 +341,17 @@ static class Avalong
 
         int[] leaderIxs = Enumerable.Range(0, leaders.Length).Select(i => Array.IndexOf(playersInOrder, leaders[i])).Where(i => i != -1).ToArray();
         int[] onMissionIx = Enumerable.Range(0, onMission.Length).Select(i => Array.IndexOf(playersInOrder, onMission[i])).Where(i => i != -1).ToArray();
-        var playerAlliances = Enumerable.Range(0, playersInOrder.Length).Select(i => !gameEnd ? "res" : playersInOrder[i].Info.IsSpy ? "spy" : "res").ToArray();
+        var playerAlliances = playersInOrder.Select(p => p == null ? "res" : !gameEnd ? "res" : p.Info.IsSpy ? "spy" : "res").ToArray();
         int banishedIx = Array.IndexOf(playersInOrder, banishedPlayer);
         int bombedIx = Array.IndexOf(playersInOrder, bombedPlayer);
         int bombRessedIx = Array.IndexOf(playersInOrder, bombRessedPlayer);
         int[] assassinationChoiceIxs = Enumerable.Range(0, assassinationChoice.Length).Select(i => Array.IndexOf(playersInOrder, assassinationChoice[i])).Where(i => i != -1).ToArray();
-        
+
         for (int i = 0; i < playersInOrder.Length; i++)
         {
+            if (playersInOrder[i] == null)
+                continue;
+
             var x = positions[i].x - imgSize / 2;
             var y = positions[i].y - imgSize / 2;
             var halfOpacs = new[] { banishedIx, bombedIx };
@@ -297,6 +405,7 @@ static class Avalong
             mainSvg += strA;
             mainSvg += strB;
         }
+        /*
         if (banishedIx != -1)
         {
             mainSvg += $@"<g transform=""translate({positions[banishedIx].x - 80}, {positions[banishedIx].y - 80})"">
@@ -321,13 +430,16 @@ static class Avalong
                     />
                 </g>";
         }
-        
+        */
 
         // Assasasination and roles
         if (gameEnd)
         {
             for (int i = 0; i < playersInOrder.Length; i++)
             {
+                if (playersInOrder[i] == null)
+                    continue;
+
                 var x = positions[i].x - imgSize / 2;
                 var y = positions[i].y - imgSize / 2;
                 mainSvg += $@"<g transform=""translate({x}, {y})"">
@@ -360,39 +472,41 @@ static class Avalong
 
         for (int svgIx = 0; svgIx < playerSvgs.Length; svgIx++)
         {
+            if (playersInOrder[svgIx] == null)
+                continue;
             var isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(i => "res").ToArray();
-            var spyTeamA = new[] { EnumAR.Assassin, EnumAR.Morgana, EnumAR.Witch, EnumAR.Mordred, EnumAR.Spy };
-            var spyTeamB = new[] { EnumAR.MordredA, EnumAR.MordredB};
+            var spyTeamA = new[] { EnumAR.Assassin, EnumAR.Morgana, EnumAR.Witch, EnumAR.Mordred, EnumAR.Spy, EnumAR.Guinevere };
+            var spyTeamB = new[] { EnumAR.MordredA, EnumAR.MordredB };
             var spyTeamC = new[] { EnumAR.Oberon };
             var roleStrings = new string[playersInOrder.Length];
             roleStrings[svgIx] = playersInOrder[svgIx].Info.RoleName;
             Console.WriteLine(roleStrings[svgIx]);
-            if (playersInOrder[svgIx].Info.Role == EnumAR.Merlin)
+            if (playersInOrder[svgIx] != null && playersInOrder[svgIx].Info.Role == EnumAR.Merlin)
             {
-                isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(x => playersInOrder[x].Info.IsSpy && playersInOrder[x].Info.IsVisibleToMerlin ? "spy" : "res").ToArray();
+                isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(x => playersInOrder[x] != null && playersInOrder[x].Info.IsSpy && playersInOrder[x].Info.IsVisibleToMerlin ? "spy" : "res").ToArray();
             }
-            else if (playersInOrder[svgIx].Info.IsSpy && spyTeamA.Contains(playersInOrder[svgIx].Info.Role))
+            else if (playersInOrder[svgIx] != null && playersInOrder[svgIx].Info.IsSpy && spyTeamA.Contains(playersInOrder[svgIx].Info.Role))
             {
-                isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(x => spyTeamA.Contains(playersInOrder[x].Info.Role) ? "spy" : "res").ToArray();
+                isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(x => playersInOrder[x] != null && spyTeamA.Contains(playersInOrder[x].Info.Role) ? "spy" : "res").ToArray();
             }
-            else if (playersInOrder[svgIx].Info.IsSpy && spyTeamB.Contains(playersInOrder[svgIx].Info.Role))
+            else if (playersInOrder[svgIx] != null && playersInOrder[svgIx].Info.IsSpy && spyTeamB.Contains(playersInOrder[svgIx].Info.Role))
             {
-                isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(x => spyTeamB.Contains(playersInOrder[x].Info.Role) ? "spy" : "res").ToArray();
+                isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(x => playersInOrder[x] != null && spyTeamB.Contains(playersInOrder[x].Info.Role) ? "spy" : "res").ToArray();
             }
-            else if (playersInOrder[svgIx].Info.IsSpy && spyTeamC.Contains(playersInOrder[svgIx].Info.Role))
+            else if (playersInOrder[svgIx] != null && playersInOrder[svgIx].Info.IsSpy && spyTeamC.Contains(playersInOrder[svgIx].Info.Role))
             {
-                isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(x => spyTeamC.Contains(playersInOrder[x].Info.Role) ? "spy" : "res").ToArray();
+                isVisibleSpy = Enumerable.Range(0, playersInOrder.Length).Select(x => playersInOrder[x] != null && playersInOrder[x] != null && spyTeamC.Contains(playersInOrder[x].Info.Role) ? "spy" : "res").ToArray();
             }
-            else if (playersInOrder[svgIx].Info.Role == EnumAR.Percival)
+            else if (playersInOrder[svgIx] != null && playersInOrder[svgIx].Info.Role == EnumAR.Percival)
             {
-                var pMerlins = Enumerable.Range(0, playersInOrder.Length).Where(p => playersInOrder[p].Info.IsPercivalCandidate).ToArray();
+                var pMerlins = Enumerable.Range(0, playersInOrder.Length).Where(x => playersInOrder[x] != null && playersInOrder[x].Info.IsPercivalCandidate).ToArray();
                 for (int i = 0; i < pMerlins.Length; i++)
                     roleStrings[pMerlins[i]] = "Merlin?";
             }
-            else if (playersInOrder[svgIx].Info.Role == EnumAR.Isolde || playersInOrder[svgIx].Info.Role == EnumAR.Tristan)
+            else if (playersInOrder[svgIx] != null && playersInOrder[svgIx].Info.Role == EnumAR.Isolde || playersInOrder[svgIx].Info.Role == EnumAR.Tristan)
             {
-                var isoldeIx = Enumerable.Range(0, playersInOrder.Length).Where(p => playersInOrder[p].Info.Role == EnumAR.Isolde).First();
-                var tristanIx = Enumerable.Range(0, playersInOrder.Length).Where(p => playersInOrder[p].Info.Role == EnumAR.Tristan).First();
+                var isoldeIx = Enumerable.Range(0, playersInOrder.Length).Where(x => playersInOrder[x] != null && playersInOrder[x].Info.Role == EnumAR.Isolde).First();
+                var tristanIx = Enumerable.Range(0, playersInOrder.Length).Where(x => playersInOrder[x] != null && playersInOrder[x].Info.Role == EnumAR.Tristan).First();
                 roleStrings[isoldeIx] = "Isolde";
                 roleStrings[tristanIx] = "Tristan";
             }
@@ -401,6 +515,8 @@ static class Avalong
             int y;
             for (int playerIx = 0; playerIx < playersInOrder.Length; playerIx++)
             {
+                if (playersInOrder[playerIx] == null)
+                    continue;
                 x = positions[playerIx].x - imgSize / 2;
                 y = positions[playerIx].y - imgSize / 2;
                 var alliance = isVisibleSpy[playerIx];
@@ -467,7 +583,7 @@ static class Avalong
                     />
                 </g>";
             }
-            
+
             for (int i = 0; i < onMissionIx.Length; i++)
             {
                 mainSvg += $@"<g transform=""translate({(positions[onMissionIx[i]].x - (imgSize / 2) - 15)}, {(positions[onMissionIx[i]].y - (imgSize / 2)) + 105})"">
@@ -482,6 +598,7 @@ static class Avalong
             }
         }
 
+        /*
         var hammerHolderPos = Array.IndexOf(playersInOrder, hammerHolder);
         if (!gameEnd && hammerHolderPos != -1)
         {
@@ -495,7 +612,7 @@ static class Avalong
                     />
                 </g>";
         }
-
+        */
         var powerHolderPos = Enumerable.Range(0, powers.Length).Select(i => Array.IndexOf(playersInOrder, powerHolders[i])).ToArray();
         for (int i = 0; i < powers.Length; i++)
         {
@@ -518,6 +635,9 @@ static class Avalong
 
         for (int i = 0; i < playersInOrder.Length; i++)
         {
+            if (playersInOrder[i] == null)
+                continue;
+
             File.WriteAllText(@$"..\..\..\..\playerSvgs\{playersInOrder[i].PlayerName}.svg", @$"<svg
             xmlns=""http://www.w3.org/2000/svg""
             xmlns:xlink=""http://www.w3.org/1999/xlink""
@@ -525,6 +645,16 @@ static class Avalong
             {playerSvgs[i]}</svg>
         ");
         }
+    }
+
+    public static T[] RotateLeft<T>(T[] array, int amount)
+    {
+        if (array.Length == 0)
+            return array;
+
+        amount %= array.Length;
+
+        return array.Skip(amount).Concat(array.Take(amount)).ToArray();
     }
 
     public static class ListShuffler
